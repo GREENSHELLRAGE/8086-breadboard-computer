@@ -36,6 +36,8 @@ Maybe one day I'll set up a C compiler for this computer, but for now, all code 
 
 To compile the assembly code, type ```nasm -o test.bin test.asm```. This will create a binary ROM image called ```test.bin```. However, this ROM image needs to be split into even and odd bytes due to how the ROM chips are connected to the CPU via a 16-bit data bus. To split the bytes, you can run my included Python script by typing ```python bytesplitter.py test.bin```. There will now be 2 files called ```test even bytes.bin``` and ```test odd bytes.bin```.
 
+Alternatively, you can use my shell script that does all of this for you by typing ```sh compile.sh test.asm```.
+
 Finally, use an EEPROM programmer to flash the 2 ROM chips. Flash ```test even bytes.bin``` onto the ROM chip connected to the lower data bus (DO-D7), and flash ```test odd bytes.bin``` onto the ROM chip connected to the upper data bus (D8-D15). I'll add more detailed instructions on how to use the EEPROM programmer when I resume working on this project.
 
 # Hardware Testing
