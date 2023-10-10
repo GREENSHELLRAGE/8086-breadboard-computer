@@ -26,7 +26,7 @@ So far, I have tested the CPU, FPU, RAM, and ROM in real life on a breadboard an
 
 # Dependencies
 
-NASM: This is the assembler that will compile the assembly code into binary executables, download from https://www.nasm.us/ 
+NASM: This is the assembler that will compile the assembly code into binary executables, you can download it from https://www.nasm.us/ 
 
 You'll also need an EEPROM programmer to flash the binary ROM images onto the actual ROM chips.
 
