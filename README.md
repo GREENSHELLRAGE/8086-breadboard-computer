@@ -8,7 +8,7 @@ Circuit schematics and images of the computer can be found in the schematics fol
 
 CPU: Intel 8086 8MHz
 
-FPU (math coprocessor): Intel 8087
+FPU (math coprocessor): Intel 8087 10MHz
 
 RAM: 256KB
 
