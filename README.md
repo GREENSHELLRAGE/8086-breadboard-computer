@@ -1,6 +1,6 @@
 # 8086 Breadboard Computer
 
-This project may take a few years to complete, I'll be working on it every once in a while whenever I have free time. The end goal is to make a video game and run it on this computer.
+This is by far the craziest personal project I've ever worked on, and it may take a few years to complete, I'll be working on it every once in a while whenever I have free time. The end goal is to make a video game and run it on this computer.
 
 Circuit schematics and images of the computer can be found in the schematics folder.
 
