@@ -48,6 +48,6 @@ If the CPU was a static CMOS CPU, I would be able to connect LEDs to the pins of
 
 Unfortunately I can't push a button 2 million times per second, so I built a clock generator circuit using a 10MHz crystal oscillator and a couple of 74HC04 CMOS inverter gates (this circuit can be found in the schematics). I then connected the output of the clock generator circuit to a decade counter chip to give me 2MHz, 5MHz, and 10MHz clock signals. I'm using an HP 1631D logic analyzer to probe the address, data, bus control, clock, and reset lines of the computer. I then set the logic analyzer to trigger on the reset pulse to start recording as soon as the computer powers on. This setup allows me to see the state of the address, data, and bus control lines of the computer on every clock cycle of the CPU.
 
-The included image of the logic analyzer shows the Intel 8087 writing its hardcoded value of PI into memory address 0x01000, and apparently it's writing this value backwards.
+The included image of the logic analyzer shows the Intel 8087 writing its hardwired value of pi (0x400921FB54442D18) into memory address 0x01000, and apparently it's writing this value backwards.
 
 ![HP1631D trace](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/schematics/logicanalyzer.JPG)
