@@ -20,7 +20,7 @@ Display: 240x128 graphic LCD module (UltraChip UCi6963C)
 
 IO: 2 Sega Genesis controller inputs, Intel 8251 RS-232 UART
 
-I plan on running the computer at 10MHz, since the 8086 CPU still works when overclocked to 10MHz. I still need to test if the LCD controller, Sega Genesis controller interface, and RS-232 UART also work when overclocking the system. If not, I'll probably use a clock divider circuit or maybe I'll figure out a better way of connecting them to the computer.
+I plan on running the computer at 10MHz, since the 8MHz 8086 CPU still works when overclocked to 10MHz. I still need to test if the LCD controller, Sega Genesis controller interface, and RS-232 UART also work when overclocking the system. If not, I'll probably use a clock divider circuit or maybe I'll figure out a better way of connecting them to the computer.
 
 # Progress
 
