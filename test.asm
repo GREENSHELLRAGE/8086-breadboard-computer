@@ -213,19 +213,19 @@ _print_loop:
     ; Reads 2 characters, first one in al register, next one in ah register
     ; Also increments the si register by 2
     lodsw
-    ; Test the first character
-    test bl,al ; Check if al register contains the null character
-    jz _end_print ; Stops printing if the al register contains the null character
-    sub al,bh ; Convert the character in the al register to the byte to send to the display
-    ; Send first byte to the display
+    ; Test if the first character is null
+    test bl,al
+    jz _end_print ; Exit if character is null
+    ; Send first character to the display
+    sub al,bh
     call lcd_auto_status_check
     out lcd_data_addr,al
-    ; Test the second character
-    test bl,ah ; Check if al register contains the null character
-    jz _end_print ; Stops printing if the al register contains the null character
-    sub ah,bh ; Convert the character in the al register to the byte to send to the display
-    ; Send second byte to the display
+    ; Test if the second character is null
+    test bl,ah
+    jz _end_print ; Exit if character is null
+    ; Send second character to the display
     mov al,ah
+    sub ah,bh
     call lcd_auto_status_check
     out lcd_data_addr,al
     jmp _print_loop
