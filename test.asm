@@ -122,7 +122,7 @@ lcd_init:
     out lcd_command_addr,al
 
     ; Set display mode (text on, graphics on, cursor on, blink on)
-    ; writeCommand(0x81)
+    ; writeCommand(0x9f)
     mov al,0x9f
     call lcd_status_check
     out lcd_command_addr,al
