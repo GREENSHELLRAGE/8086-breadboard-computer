@@ -210,7 +210,7 @@ lcd_print_string:
     mov bx,0x20ff
 ; Loop throught string and print to display one character at a time
 _print_loop:
-    ; Reads 2 characters, first one in al register, next one in ah register
+    ; Reads 2 characters, first one in al register, second one in ah register
     ; Also increments the si register by 2
     lodsw
     ; Test if the first character is null
