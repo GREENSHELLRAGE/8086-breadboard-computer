@@ -49,6 +49,16 @@ setup:
     xor sp,sp
 main:
     call lcd_init
+
+    ; Print hello world to the LCD (NOT TESTED)
+
+    ; Set the data segment register to point to the code segment (since the string is stored in ROM with the code)
+    mov ax,0xc000
+    mov ds,ax
+    ; Set the source index to the location of the string within the code
+    mov si,hello_world_string
+    ; Print the string to the display
+    call lcd_print_string
     ; Halt the cpu
     hlt
 
@@ -161,21 +171,75 @@ lcd_init:
 
     ret
 
+
 ; Repeatedly checks if bits 0 and 1 of the lcd status byte are 1
 lcd_status_check:
+    push ax
+    mov ah,0x03
+_status_loop:
     in al,lcd_command_addr
     not al
-    and al,0x03
-    jnz lcd_status_check
+    test al,ah
+    jnz _status_loop
+    pop ax
     ret
+
 
 ; Repeatedly checks if bits 2 and 3 of the lcd status byte are 1
 lcd_auto_status_check:
+    push ax
+    mov ah,0x0c
+_auto_status_loop:
     in al,lcd_command_addr
     not al
-    and al,0x0c
-    jnz lcd_auto_status_check
+    test al,ah
+    jnz _auto_status_loop
+    pop ax
     ret
+
+
+; Prints a null-terminated string located at ds[si]
+lcd_print_string:
+    ; Start auto write
+    ; writeCommand(0xb0)
+    mov al,0xb0
+    call lcd_status_check
+    out lcd_command_addr,al
+    ; Set bh register to 0x20 so that "sub al,bh" converts the character in the al register to the byte to send to the display
+    ; Set bl register to 0xff so that "test bl,al" sets the zero flag if the al register contains the null character
+    mov bx,0x20ff
+; Loop throught string and print to display one character at a time
+_print_loop:
+    ; Reads 2 characters, first one in al register, next one in ah register
+    ; Also increments the si register by 2
+    lodsw
+    ; Test the first character
+    test bl,al ; Check if al register contains the null character
+    jz _end_print ; Stops printing if the al register contains the null character
+    sub al,bh ; Convert the character in the al register to the byte to send to the display
+    ; Send first byte to the display
+    call lcd_auto_status_check
+    out lcd_data_addr,al
+    ; Test the second character
+    test bl,ah ; Check if al register contains the null character
+    jz _end_print ; Stops printing if the al register contains the null character
+    sub ah,bh ; Convert the character in the al register to the byte to send to the display
+    ; Send second byte to the display
+    mov al,ah
+    call lcd_auto_status_check
+    out lcd_data_addr,al
+    jmp _print_loop
+_end_print:
+    ; Stop auto write
+    ; writeCommand(0xb2)
+    mov al,0xb0
+    call lcd_auto_status_check
+    out lcd_command_addr,al
+    ret
+
+
+; Define hello world string
+hello_world_string db "Hello world!", 0
 
 
 
