@@ -205,7 +205,8 @@ lcd_print_string:
     mov al,0xb0
     call lcd_status_check
     out lcd_command_addr,al
-    ; Setup bh register to speed up character testing
+    ; Set bl to 0xff so that "test bl,al" sets the 0 flag if al contains the null character
+    ; Set bh to 0x20 so that "sub al,bh" converts the ascii character to the byte to send to the display
     mov bx,0x20ff
 ; Loop throught string and print to display one character at a time
 _print_loop:
