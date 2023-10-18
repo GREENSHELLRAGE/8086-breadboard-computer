@@ -232,7 +232,7 @@ _print_loop:
 _end_print:
     ; Stop auto write
     ; writeCommand(0xb2)
-    mov al,0xb0
+    mov al,0xb2
     call lcd_auto_status_check
     out lcd_command_addr,al
     ret
