@@ -224,7 +224,7 @@ _print_loop:
     jz _end_print ; Exit if character is null
     ; Send second character to the display
     mov al,ah
-    sub ah,bh
+    sub al,bh
     call lcd_auto_status_check
     out lcd_data_addr,al
     jmp _print_loop
