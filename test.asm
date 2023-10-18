@@ -238,8 +238,10 @@ _end_print:
     ret
 
 
-; Define hello world string
-hello_world_string db "Hello world!", 0
+; Align strings to start on even bytes
+; This optimization allows string operations to read 2 characters with 1 memory read cycle
+align 2
+hello_world_string db "Hello world! ", 0 ; Define hello world string
 
 
 
