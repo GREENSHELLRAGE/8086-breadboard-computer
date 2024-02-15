@@ -27,6 +27,8 @@ reset_addr equ 0xffff0 ; Address of first instruction executed by CPU after powe
 ; IO Address Constants
 lcd_data_addr equ 0x00
 lcd_command_addr equ 0x02
+usart_data_addr equ 0x10
+usart_command_addr equ 0x12
 
 ; LCD Constants
 lcd_text_columns equ 40
@@ -49,8 +51,9 @@ setup:
     xor sp,sp
 main:
     call lcd_init
+    call usart_init
 
-    ; Print hello world to the LCD (NOT TESTED)
+    ; Print hello world to the LCD and USART (NOT TESTED)
 
     ; Set the data segment register to point to the code segment (since the string is stored in ROM with the code)
     mov ax,0xc000
@@ -59,6 +62,8 @@ main:
     mov si,hello_world_string
     ; Print the string to the display
     call lcd_print_string
+    ; Print the string to the USART
+    call usart_print_string
     ; Halt the cpu
     hlt
 
@@ -198,7 +203,7 @@ _auto_status_loop:
     ret
 
 
-; Prints a null-terminated string located at ds[si]
+; Prints a null-terminated string located at ds[si] (this subroutine can be optimized, but only after I verify that this code actually works)
 lcd_print_string:
     ; Start auto write
     ; writeCommand(0xb0)
@@ -209,32 +214,93 @@ lcd_print_string:
     ; Set bh to 0x20 so that "sub al,bh" converts the ascii character to the byte to send to the display
     mov bx,0x20ff
 ; Loop throught string and print to display one character at a time
-_print_loop:
+_lcd_print_loop:
     ; Reads 2 characters, first one in al register, second one in ah register
     ; Also increments the si register by 2
     lodsw
     ; Test if the first character is null
     test bl,al
-    jz _end_print ; Exit if character is null
+    jz _end_lcd_print ; Exit if character is null
     ; Send first character to the display
     sub al,bh
     call lcd_auto_status_check
     out lcd_data_addr,al
     ; Test if the second character is null
     test bl,ah
-    jz _end_print ; Exit if character is null
+    jz _end_lcd_print ; Exit if character is null
     ; Send second character to the display
     mov al,ah
     sub al,bh
     call lcd_auto_status_check
     out lcd_data_addr,al
-    jmp _print_loop
-_end_print:
+    jmp _lcd_print_loop
+_end_lcd_print:
     ; Stop auto write
     ; writeCommand(0xb2)
     mov al,0xb2
     call lcd_auto_status_check
     out lcd_command_addr,al
+    ret
+
+
+
+; USART subroutines (NOT FINISHED AND NOT TESTED)
+
+; Note to self: USART will need a 9.6KHz clock signal connected to the TxC and RxC pins
+
+; Initialize the USART (this subroutine can be optimized, but only after I verify that this code actually works)
+usart_init:
+    ; Moving 0 into al register, 01001101b into ah register
+    ; 01001101b sets the USART to 1 stop bit, no parity, 8 bits, 1x baud rate
+    mov ax,0x4d00
+    ; Reset the USART by sending 0 three times
+    out usart_command_addr,al
+    out usart_command_addr,al
+    out usart_command_addr,al
+    ; Set USART mode
+    mov al,ah
+    out usart_command_addr,al
+    ; Enable request to send, reset error flags, transmit, data terminal ready, receive
+    mov al,00110111b
+    out usart_command_addr,al
+    ret
+
+
+; Repeatedly checks if bit 0 of the USART status byte is 1
+usart_tx_ready_check:
+    push ax
+    mov ah,0x01
+_usart_tx_ready_loop:
+    in al,usart_command_addr
+    test ah,al
+    jz _usart_tx_ready_loop
+    pop ax
+    ret
+
+
+; Prints a null-terminated string located at ds[si] (this subroutine can be optimized, but only after I verify that this code actually works)
+usart_print_string:
+    ; Loop throught string and print to usart one character at a time
+    mov bx,0x01ff
+_usart_print_loop:
+    ; Reads 2 characters, first one in al register, second one in ah register
+    ; Also increments the si register by 2
+    lodsw
+    ; Test if the first character is null
+    test bl,al
+    jz _end_usart_print ; Exit if character is null
+    ; Send first character to the usart
+    call usart_tx_ready_check
+    out usart_data_addr,al
+    ; Test if the second character is null
+    test bl,ah
+    jz _end_usart_print ; Exit if character is null
+    ; Send second character to the usart
+    mov al,ah
+    call usart_tx_ready_check
+    out usart_data_addr,al
+    jmp _usart_print_loop
+_end_usart_print:
     ret
 
 
