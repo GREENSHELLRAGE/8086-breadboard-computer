@@ -250,18 +250,21 @@ _end_lcd_print:
 
 ; Initialize the USART (this subroutine can be optimized, but only after I verify that this code actually works)
 usart_init:
-    ; Moving 0 into al register, 01001101b into ah register
-    ; 01001101b sets the USART to 1 stop bit, no parity, 8 bits, 1x baud rate
-    mov ax,0x4d00
-    ; Reset the USART by sending 0 three times
+    ; Moving 0 into al register, 0x40 into ah register
+    mov ax,0x4000
+    ; Reset the USART by sending 0 three times, followed by sending 0x40 once
     out usart_command_addr,al
     out usart_command_addr,al
     out usart_command_addr,al
-    ; Set USART mode
     mov al,ah
     out usart_command_addr,al
-    ; Enable request to send, reset error flags, transmit, data terminal ready, receive
-    mov al,00110111b
+    ; Moving 0x4d into al register, 0x37 into ah register
+    ; 0x4d sets the USART to 1 stop bit, no parity, 8 bits, 1x baud rate
+    ; 0x37 enables request to send, resets error flags, transmit, data terminal ready, receive
+    mov ax,0x374d
+    ; Set USART mode
+    out usart_command_addr,al
+    mov al,ah
     out usart_command_addr,al
     ret
 
