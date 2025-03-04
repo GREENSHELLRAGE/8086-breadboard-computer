@@ -28,7 +28,7 @@ I eventually plan on running the computer overclocked at 10MHz, since the 8MHz 8
 
 So far, the CPU, FPU, RAM, ROM, interrupt controller, and UART are all working on a breadboard. The computer is currently capable of acting like a serial terminal and can echo characters back to my laptop. All UART inputs/outputs are buffered in memory and handled asynchronously using interrupts.
 
-![terminal](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/terminal.JPG)
+![terminal](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/terminal.jpg)
 
 This test code in ```gsrme.asm``` will eventually turn into a small operating system for the computer called GSR Memory Editor, which will be similar to WOZMON but with some extra features. Once the operating system is capable of tesing IO devices, I'll connect the LCD display and maybe even design a high speed SD card reader for the computer.
 
