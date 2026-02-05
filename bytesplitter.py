@@ -29,8 +29,8 @@ while counter < num_bytes:
     odd_bytes.append(bytes_to_split[counter])
     counter += 1
 
-with open(file_to_split.split('.')[0] + ' even bytes.bin', 'wb') as f:
+with open(file_to_split.split('.')[0] + '_even_bytes.bin', 'wb') as f:
     f.write(bytes(even_bytes))
 
-with open(file_to_split.split('.')[0] + ' odd bytes.bin', 'wb') as f:
+with open(file_to_split.split('.')[0] + '_odd_bytes.bin', 'wb') as f:
     f.write(bytes(odd_bytes))
