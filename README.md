@@ -39,6 +39,7 @@ Here are some example commands you can enter:
 - Load/execute a program that resets the computer (see image below for program result)
 
 ```00610=ea 00 00 ff ff```
+
 ```00610!```
 
 Here's what happens when that program is executed:
