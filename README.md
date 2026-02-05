@@ -37,15 +37,18 @@ Here are some example commands you can enter:
 - Set UART to 38400 baud (happens immediately upon pressing enter)
 ```0003i=00 00 00 40 4e 37```
 - Load/execute a program that resets the computer (see image below for program result)
+
 ```00610=ea 00 00 ff ff```
 ```00610!```
+
 Here's what happens when that program is executed:
+
 ![resetprogram](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/resetprogram.jpg)
 
 The SD card interface hardware is complete, and I have sucessfully gotten an 8GB microSD card to respond to CMD0 (seen in the oscilloscope waveform below). I am still working on the code to fully initialize the SD card and read blocks of data.
 
-![sdcardonboard](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardonboard.jpg)
-![sdcardresponse](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardresponse.jpg)
+![sdcardonboard](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardonboard.JPG)
+![sdcardresponse](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardresponse.JPG)
 
 Once I can read files from the SD card, I'll connect the LCD
 display and see how quickly I can stream video data from
