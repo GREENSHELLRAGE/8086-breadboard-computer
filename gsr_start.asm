@@ -7,9 +7,8 @@ cpu 8086
 ; GSR Memory Editor, the custom operating system for my 8086 breadboard computer
 ; It's going to be like WOZMON, but with some extra features:
 ; - Read/write bytes or 16 bit words to memory and IO
-; - Trigger software interrupts
-; - Step through code 1 instruction at a time and print register contents
-; - Load files from SD cards into memory (once I eventually design a fast SD card interface and write FAT32 drivers)
+; - Load files from SD cards into memory (once I eventually write FAT32 drivers)
+; - Step through code 1 instruction at a time and print register contents (maybe, if I ever decide to make a debugger/dissassembler)
 
 
 
@@ -101,11 +100,37 @@ gsr_start:
     stosw
     mov ax,cs ; Write the CS value of the interrupt routine pointer
     stosw
-    
+    ; Set interrupt 40
+    mov di,0x00a0 ; es:[di] now points to 0x000a0
+    mov ax,sd_card_init ; Write the IP value of the interrupt routine pointer
+    stosw
+    mov ax,cs ; Write the CS value of the interrupt routine pointer
+    stosw
+    ; Set interrupt 41
+    mov ax,sd_read ; Write the IP value of the interrupt routine pointer
+    stosw
+    mov ax,cs ; Write the CS value of the interrupt routine pointer
+    stosw
+    ; Set interrupt 42
+    mov ax,sd_read_sequential ; Write the IP value of the interrupt routine pointer
+    stosw
+    mov ax,cs ; Write the CS value of the interrupt routine pointer
+    stosw
+    ; Set interrupt 43
+    mov ax,sd_write ; Write the IP value of the interrupt routine pointer
+    stosw
+    mov ax,cs ; Write the CS value of the interrupt routine pointer
+    stosw
+    ; Set interrupt 44
+    mov ax,sd_write_sequential ; Write the IP value of the interrupt routine pointer
+    stosw
+    mov ax,cs ; Write the CS value of the interrupt routine pointer
+    stosw
+
     ; Initialize output buffer
     mov ds,ax
     mov si,welcome_string ; ds:[si] points to welcome string
-    mov cx,welcome_string_half_length ; cx has nomber of string copy operations to do
+    mov cx,welcome_string_half_length ; cx has number of string copy operations to do
     mov di,(variables_segment << 4) ; di = 0x0400, es:[di] points to outbuf[0]
     ; Output carriage return + line feed
     mov ax,0x0a0d
@@ -197,6 +222,7 @@ _print_registers:
 %include "gsr_uart_txready_routine.asm"
 %include "gsr_uart_txready_memread_routine.asm"
 %include "gsr_uart_rxready_routine.asm"
+%include "gsr_sd_card_interface.asm"
 ; Strings referenced by the code
 %include "strings.asm"
 

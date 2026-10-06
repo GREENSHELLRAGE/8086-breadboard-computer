@@ -9,12 +9,22 @@ cpu 8086
 ; and quite fast so I'll probably work on SD card support before
 ; rewriting a good portion of the operating system lol
 
-; INPORTANT THING TO IMPLEMENT
-; To avoid missing input characters, make sure the RTS (request
-; to send) and CTS (clear to send) pins on the UART indicate to
-; the terminal that we are not ready to receive characters until
-; we are finished processing user input.
 
+; INPORTANT THING TO IMPLEMENT
+; Implement flow control to avoid missing input characters.
+; The RTS (request to send) output must be set high when a
+; carriage return is received, and set low once we finish
+; processing the input buffer.
+
+; Disable receiving:
+; mov al,00000011b ; Transmit enable, data terminal ready, receive disable, normal operation, NOT request to send
+; out uart_command_addr,al
+; Reenable receiving:
+; mov al,00100111b ; Transmit enable, data terminal ready, receive enable, normal operation, request to send
+; out uart_command_addr,al
+
+; GSR memory editor test command (check RTS pin on oscilloscope, should go up/down once):
+; 0003i=03 27
 
 
 ; First parameter is the index of the string relative to gsr_segment
@@ -69,47 +79,6 @@ cpu 8086
 
 
 ; Interrupt service routine for the uart receiving a character
-; char <-- UART
-; if (char == 0x0d) {
-;     if (inbuf_writeptr == 0) {
-;         outbuf[0] = 0x0d
-;         outbuf[1] = 0x0a
-;         outbuf[2] = 0x3e
-;         outbuf[3] = 0x20
-;         outbuf_writeptr = 4
-;         mask the uart rxready interrupt
-;         unmask the uart txready interrupt
-;         return
-;     } else {
-;         goto gsr_run_command
-;     }
-; }
-; if (char == 0x7f) {
-;     if (inbuf_writeptr == 0) {
-;         return
-;     } else {
-;         outbuf[0] = 0x08
-;         outbuf[1] = 0x20
-;         outbuf[2] = 0x08
-;         outbuf_writeptr = 3
-;         mask the uart rxready interrupt
-;         unmask the uart txready interrupt
-;         return
-;     }
-; }
-; if (char >= 0x20 && char <= 0x7f) {
-;     if (inbuf_writeptr == 0x1ff) {
-;         return
-;     } else {
-;         inbuf[inbuf_writeptr] = char
-;         inbuf_writeptr++
-;         outbuf[0] = char
-;         outbuf_writeptr = 1
-;         mask the uart rxready interrupt
-;         unmask the uart txready interrupt
-;         return
-;     }
-; }
 gsr_uart_rxready_routine:
     push ax
     push ds
@@ -127,7 +96,7 @@ gsr_uart_rxready_routine:
     jb _end_rxready_routine ; Character was not between 0x20-0x7f
     sub al,0x80 ; Map 0xa0-0xff --> 0x20-0x7f
     cmp byte [si],0xff ; Check for full input buffer
-    je _end_rxready_routine
+    je _end_rxready_routine ; Input buffer is full
     mov si,word[si] ; ds:[si] points to inbuf[inbuf_writeptr]
     mov byte [si],al ; inbuf[inbuf_writeptr] = char
     inc word [inbuf_writeptr] ; inbuf_writeptr++
@@ -143,10 +112,15 @@ _end_rxready_routine:
     iret
 _handle_backspace:
     mov ax,word [si] ; ax = inbuf_writeptr
-    cmp al,ah ; ah will always be 0x01 here
+    cmp al,ah ; Check if inbuf is empty, ah will always be 0x01 here
     jb _end_rxready_routine ; inbuf is empty, return
     dec ax ; inbuf_writeptr--
-    mov word [si],ax
+    mov word [si],ax ; update inbuf_writeptr
+    
+    ; Disable receiving (since we'll be sending multiple characters)
+    mov al,00000011b ; Transmit enable, data terminal ready, receive disable, normal operation, NOT request to send
+    out uart_command_addr,al
+
     mov ax,0x2008
     mov word [0x0000],ax ; outbuf[0] = 0x08, outbuf[1] = 0x20
     mov byte [0x0002],al ; outbuf[2] = 0x08
@@ -159,6 +133,11 @@ _handle_backspace:
     pop ax
     iret
 _handle_carriage_return:
+
+    ; Disable receiving (since we'll be sending multiple characters)
+    mov al,00000011b ; Transmit enable, data terminal ready, receive disable, normal operation, NOT request to send
+    out uart_command_addr,al
+
     mov ax,word [si] ; ax = inbuf_writeptr
     cmp al,ah ; ah will always be 0x01 here
     ja gsr_run_command ; inbuf has characters, parse and run command
@@ -196,16 +175,12 @@ single_character_command:
     xor di,di ; es:[di] points to outbuf[0]
     mov si,cs
     mov ds,si
+    ; Check if the character is 'h'
     cmp al,0x68 ; 'h'
-    jne invalid_address_1 ; Character was not h
-    ; Character was h, print help string
-    ; THIS IS SKETCHY!!!
-    ; The help string is larger than the outbuf and will spill into the inbuf
-    ; This should be ok since the contents of the inbuf are not needed right now
     mov si,help_string
     mov cx,help_string_half_length
-    jmp copy_string
-invalid_address_1:
+    je copy_string ; Character was h, print help string
+    ; Character was not h, print invalid address string
     mov si,invalid_address_string
     mov cx,invalid_address_string_half_length
 copy_string:
@@ -243,17 +218,12 @@ gsr_run_command:
     push es
     push di
     push bp
-
-    ; Single character commands may be implemented in the future
-    ;je single_character_command
-    ; ** More checks can be added here for implementing future commands **
-
     ; Assuming that the command starts with a memory or IO address
-    cmp al,0x05
+    cmp al,0x05 ; Check if command is 5 characters long
     jb invalid_address ; Command is less than 5 characters
     ; Load first 2 characters of inbuf
     mov si,0x0100 ; ds:[si] points to inbuf[0]
-    mov di,ax
+    mov di,ax ; di = inbuf_writeptr
     lodsw
     ; Set up registers with frequently used values
     mov bx,0x2089

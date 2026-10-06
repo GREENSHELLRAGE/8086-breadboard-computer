@@ -212,7 +212,7 @@ final_row_complete:
     stosw
     ; Update outbuf writeptr
     mov word es:[outbuf_writeptr],di
-    ; Change interrupt handler for txready back to normal
+    ; Change interrupt handler for txready back to gsr_uart_txready_routine
     xor bp,bp
     mov ds,bp
     mov ax,gsr_uart_txready_routine ; replace with actual value

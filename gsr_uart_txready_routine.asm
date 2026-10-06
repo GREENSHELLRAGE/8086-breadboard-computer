@@ -40,7 +40,12 @@ _mask_txready_interrupt:
     xor ax,ax ; ax = 0
     mov word [outbuf_readptr],ax ; outbuf_readptr = 0
     mov word [outbuf_writeptr],ax ; outbuf_writeptr = 0
-    ; Change interrupt masks
+
+    ; Reenable receiving:
+    mov al,00100111b ; Transmit enable, data terminal ready, receive enable, normal operation, request to send
+    out uart_command_addr,al
+
+    ; Toggle interrupt masks
     in al,pic_oper_addr ; Read interrupt mask register
     ; Using xor to toggle the interrupt masks is faster than setting the interrupt masks using:
     ;     or al,00000010b ; Mask uart rxready interrupt (interrupt 1 on the 8259)

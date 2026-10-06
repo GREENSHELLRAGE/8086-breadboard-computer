@@ -9,7 +9,7 @@ except FileNotFoundError:
     print('Could not split ' + file_to_split + ', file not found!')
     exit(1)
 
-print('Splitting ' + file_to_split + '...')
+print('Splitting ' + file_to_split)
 
 num_bytes = len(bytes_to_split)
 even_bytes = []

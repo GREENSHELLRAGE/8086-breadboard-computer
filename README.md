@@ -20,7 +20,7 @@ IO:
 - Intel 8259 Interrupt Controller
 - Intel 8251 UART
 - Custom high speed SD card interface (made from 74 series logic)
-- 240x128 graphic LCD module (UltraChip UCi6963C) NOT CONNECTED YET
+- 240x128 graphic LCD module (UltraChip UCi6963C) NOT CONNECTED/TESTED YET
 
 It's actually a miracle this computer even works at all since almost everything is running above its rated speed!
 
@@ -46,14 +46,16 @@ Here's what happens when that program is executed:
 
 ![resetprogram](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/resetprogram.jpg)
 
-The SD card interface hardware is complete, and I have sucessfully gotten an 8GB microSD card to respond to CMD0 (seen in the oscilloscope waveform below). I am still working on the code to fully initialize the SD card and read blocks of data.
+The SD card interface hardware is complete, and I have sucessfully read raw sectors from an 8GB microSD card at 975KB/s! The software interrupts for reading and writing sectors have now been added to GSR memory editor and can be called by other programs. I am currently working on reading the FAT32 filesystem.
 
 ![sdcardonboard](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardonboard.JPG)
-![sdcardresponse](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardresponse.JPG)
 
-Once I can read files from the SD card, I'll connect the LCD
-display and see how quickly I can stream video data from
-the card (Bad Apple at 240x128 at 60fps should theoretically be possible unless I encounter some major issue with the display).
+4KB of data being read in 4.2ms (excluding initial access latency)
+![sdcardresponse](https://raw.githubusercontent.com/GREENSHELLRAGE/8086-breadboard-computer/main/images/sdcardtransfer.JPG)
+
+Once I can read files from the SD card, I'll connect the LCD display and attempt to stream uncompressed video from the SD card to the display at 60 frames per second.
+
+I'm also considering building a sound card with two 8-bit DACs. 44.1KHz 8-bit stereo PCM audio may be possible with hardware buffers and precicely timed code.
 
 # Dependencies
 
@@ -63,7 +65,7 @@ You'll also need an EEPROM programmer to flash the binary ROM images onto the ac
 
 # Compiling and Flashing the Code
 
-Maybe one day I'll set up a C compiler for this computer, but for now I'm writing everything in 16-bit x86 assembly.
+All code for this computer has been written from scratch in x86 assembly.
 
 To compile the code, run ```make```. The makefile will compile the code and then run a python script which splits the odd/even bytes. There should be 2 files called ```gsr_memory_editor_even_bytes.bin``` and ```gsr_memory_editor_odd_bytes.bin```, which are both 256KB files which can be flashed directly onto the ROM chips.
 
